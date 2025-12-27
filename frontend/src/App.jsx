@@ -10,6 +10,7 @@ import Register from "../pages/Register";
 import Login from "../pages/Login";
 import Navbar from "../components/Navbar";
 import axios from "axios";
+import NotFound from "../components/NotFound";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -78,6 +79,8 @@ function App() {
           path="/register"
           element={user ? <Navigate to="/" /> : <Register setUser={setUser} />}
         />
+        <Route path="*" element={<NotFound />} />
+
       </Routes>
     </Router>
   );
