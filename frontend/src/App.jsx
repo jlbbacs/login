@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
-  Route,
   Routes,
+  Route,
+  Navigate, // ✅ FIX: import Navigate
 } from "react-router-dom";
 import Home from "../pages/Home";
 import Register from "../pages/Register";
@@ -13,33 +14,50 @@ import axios from "axios";
 function App() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); // ✅ loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const res = await axios.get("http://localhost:5000/api/users/me", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(res.data);
-        } catch (err) {
-          setError("Failed to fetch data");
-          localStorage.removeItem("token");
-        }
+
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false); // ✅ done loading
+
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/users/me",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            timeout: 8000,
+          }
+        );
+
+        setUser(res.data);
+      } catch (err) {
+        console.error(err);
+        setError("Session expired. Please login again.");
+        localStorage.removeItem("token");
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchUser();
   }, []);
 
+  // ✅ Loading screen (slow network safe)
   if (loading) {
-    // ✅ show a simple loading screen while checking
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-500 text-lg">Loading...</p>
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500 mb-3"></div>
+          <p className="text-gray-600 text-sm">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -49,8 +67,17 @@ function App() {
       <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route path="/" element={<Home user={user} error={error} />} />
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/register" element={<Register setUser={setUser} />} />
+
+        {/* ✅ Prevent logged-in users from accessing login */}
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" /> : <Login setUser={setUser} />}
+        />
+
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/" /> : <Register setUser={setUser} />}
+        />
       </Routes>
     </Router>
   );

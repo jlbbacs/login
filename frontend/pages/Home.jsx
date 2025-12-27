@@ -16,6 +16,7 @@ function Home({ user, error }) {
           </div>
         ) : (
           <div>
+            <div><h1>Welcome to MERN login test</h1></div>
             <p>Please log in to see your profile</p>
             <div className="mt-4 flex justify-center gap-4">
               <Link to="/login" className="text-blue-500 hover:underline">
