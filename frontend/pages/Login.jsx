@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Login({ setUser }) {
   const [error, setError] = useState("");
@@ -22,7 +23,7 @@ function Login({ setUser }) {
       const res = await axios.post("http://localhost:5000/api/users/login", formData);
       localStorage.setItem("token", res.data.token);
       setUser(res.data);
-      console.log(res.data);
+      console.log(res.data)
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
@@ -66,7 +67,9 @@ function Login({ setUser }) {
           <button className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 font-medium cursor-pointer">
             Login
           </button>
+          
         </form>
+        
       </div>
     </div>
   );
